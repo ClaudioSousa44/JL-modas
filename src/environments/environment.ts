@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api'
+  apiUrl: 'https://jl-modas-backend-production.up.railway.app/api'
 };
 
 
