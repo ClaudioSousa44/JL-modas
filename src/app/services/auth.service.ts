@@ -16,11 +16,19 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
+    console.log('AuthService - Fazendo requisição para:', `${this.apiUrl}/auth/login`);
+    console.log('AuthService - Credenciais enviadas:', { email: credentials.email, password: '***' });
+    
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials)
       .pipe(
         tap(response => {
-          localStorage.setItem(this.tokenKey, response.token);
-          this.isAuthenticatedSubject.next(true);
+          console.log('AuthService - Resposta recebida:', response);
+          if (response && response.token) {
+            localStorage.setItem(this.tokenKey, response.token);
+            // Atualiza o BehaviorSubject de forma síncrona
+            this.isAuthenticatedSubject.next(true);
+            console.log('AuthService - Token salvo e estado atualizado');
+          }
         })
       );
   }

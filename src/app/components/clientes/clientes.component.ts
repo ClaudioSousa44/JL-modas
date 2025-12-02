@@ -1,26 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { ClienteService } from '../../services/cliente.service';
 import { Cliente } from '../../models/cliente.model';
 
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="clientes-container">
-      <header class="dashboard-header">
-        <h1>JL Modas - Clientes</h1>
-        <nav class="nav-menu">
-          <a routerLink="/dashboard" class="nav-item">Dashboard</a>
-          <a routerLink="/clientes" class="nav-item active">Clientes</a>
-          <a routerLink="/vendas" class="nav-item">Vendas</a>
-          <button class="btn btn-danger" (click)="logout()">Sair</button>
-        </nav>
-      </header>
+      <div class="page-header">
+        <h1>Clientes</h1>
+        <p class="page-subtitle">Gerencie seus clientes</p>
+      </div>
 
       <div class="container">
         <div class="card">
@@ -46,6 +39,8 @@ import { Cliente } from '../../models/cliente.model';
                 name="numero"
                 required
                 placeholder="(00) 00000-0000"
+                maxlength="15"
+                (input)="aplicarMascaraTelefone($event)"
               />
             </div>
             <button type="submit" class="btn btn-primary">
@@ -73,7 +68,7 @@ import { Cliente } from '../../models/cliente.model';
             <tbody>
               <tr *ngFor="let cliente of clientes">
                 <td>{{ cliente.nome }}</td>
-                <td>{{ cliente.numero }}</td>
+                <td>{{ formatarTelefone(cliente.numero) }}</td>
                 <td>R$ {{ formatarValor(cliente.valorDevido || 0) }}</td>
                 <td>
                   <button class="btn btn-primary" (click)="editarCliente(cliente)" style="margin-right: 5px;">
@@ -97,44 +92,134 @@ import { Cliente } from '../../models/cliente.model';
     .clientes-container {
       min-height: 100vh;
       background-color: #f5f5f5;
+      padding: 32px;
     }
 
-    .dashboard-header {
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 8px 0;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+    }
+
+    .card {
       background: white;
-      padding: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 30px;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
     }
 
-    .dashboard-header h1 {
-      color: #667eea;
-      margin-bottom: 15px;
+    .card h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #111827;
+      margin: 0 0 20px 0;
     }
 
-    .nav-menu {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
+    .form-group {
+      margin-bottom: 16px;
     }
 
-    .nav-item {
-      padding: 8px 16px;
-      text-decoration: none;
-      color: #333;
-      border-radius: 4px;
-      transition: all 0.3s;
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 8px;
     }
 
-    .nav-item:hover,
-    .nav-item.active {
-      background-color: #667eea;
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #1e3a8a;
+      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 8px;
+    }
+
+    .btn-primary {
+      background-color: #1e3a8a;
       color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #1e40af;
+    }
+
+    .btn-danger {
+      background-color: #dc2626;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #b91c1c;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .table th {
+      text-align: left;
+      padding: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table td {
+      padding: 12px;
+      font-size: 14px;
+      color: #111827;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .table tr:hover {
+      background-color: #f9fafb;
     }
 
     .loading {
       text-align: center;
-      padding: 20px;
-      color: #666;
+      padding: 40px;
+      color: #6b7280;
     }
   `]
 })
@@ -148,9 +233,7 @@ export class ClientesComponent implements OnInit {
   loading = false;
 
   constructor(
-    private clienteService: ClienteService,
-    private authService: AuthService,
-    private router: Router
+    private clienteService: ClienteService
   ) {}
 
   ngOnInit(): void {
@@ -206,6 +289,15 @@ export class ClientesComponent implements OnInit {
 
   editarCliente(cliente: Cliente): void {
     this.clienteForm = { ...cliente };
+    // Formata o número se já não estiver formatado
+    if (cliente.numero && !cliente.numero.includes('(')) {
+      const numeros = cliente.numero.replace(/\D/g, '');
+      if (numeros.length <= 10) {
+        this.clienteForm.numero = `(${numeros.substring(0, 2)}) ${numeros.substring(2, 6)}-${numeros.substring(6)}`;
+      } else {
+        this.clienteForm.numero = `(${numeros.substring(0, 2)}) ${numeros.substring(2, 7)}-${numeros.substring(7, 11)}`;
+      }
+    }
     this.editandoClienteId = cliente.id?.toString() || null;
   }
 
@@ -235,13 +327,48 @@ export class ClientesComponent implements OnInit {
     this.editandoClienteId = null;
   }
 
-  formatarValor(valor: number): string {
-    return valor.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  aplicarMascaraTelefone(event: any): void {
+    let valor = event.target.value;
+    // Remove tudo que não é dígito
+    valor = valor.replace(/\D/g, '');
+    
+    // Limita a 11 dígitos (máximo para celular brasileiro)
+    if (valor.length > 11) {
+      valor = valor.substring(0, 11);
+    }
+    
+    // Aplica a máscara conforme o tamanho
+    if (valor.length <= 2) {
+      valor = valor;
+    } else if (valor.length <= 6) {
+      valor = `(${valor.substring(0, 2)}) ${valor.substring(2)}`;
+    } else if (valor.length <= 10) {
+      // Telefone fixo: (00) 0000-0000
+      valor = `(${valor.substring(0, 2)}) ${valor.substring(2, 6)}-${valor.substring(6)}`;
+    } else {
+      // Celular: (00) 00000-0000
+      valor = `(${valor.substring(0, 2)}) ${valor.substring(2, 7)}-${valor.substring(7, 11)}`;
+    }
+    
+    this.clienteForm.numero = valor;
   }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  formatarTelefone(numero: string): string {
+    if (!numero) return '';
+    // Se já estiver formatado, retorna como está
+    if (numero.includes('(')) return numero;
+    // Remove tudo que não é dígito
+    const numeros = numero.replace(/\D/g, '');
+    // Aplica a máscara
+    if (numeros.length <= 10) {
+      return `(${numeros.substring(0, 2)}) ${numeros.substring(2, 6)}-${numeros.substring(6)}`;
+    } else {
+      return `(${numeros.substring(0, 2)}) ${numeros.substring(2, 7)}-${numeros.substring(7, 11)}`;
+    }
+  }
+
+  formatarValor(valor: number): string {
+    return valor.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
 }
 

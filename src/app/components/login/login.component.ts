@@ -15,10 +15,7 @@ import { AuthService } from '../../services/auth.service';
           <!-- Logo -->
           <div class="logo-container">
             <div class="logo">
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <rect width="40" height="40" rx="4" fill="#1e3a8a"/>
-                <path d="M20 12L25 18H22V26H18V18H15L20 12Z" fill="white"/>
-              </svg>
+              <img src="assets/JL-logo.png" alt="JL Modas" class="logo-image" />
             </div>
           </div>
 
@@ -139,14 +136,18 @@ import { AuthService } from '../../services/auth.service';
     }
 
     .logo {
-      width: 56px;
-      height: 56px;
-      background: #1e3a8a;
-      border-radius: 8px;
+      width: 120px;
+      height: 120px;
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     .title-section {
@@ -317,7 +318,7 @@ import { AuthService } from '../../services/auth.service';
 
     .decorative-image {
       flex: 1;
-      background: linear-gradient(135deg, #E8D5B7 0%, #D4A574 50%, #C9A067 100%);
+      background: linear-gradient(135deg, #DC2626 0%, #B91C1C 50%, #991B1B 100%);
       position: relative;
       display: none;
       overflow: hidden;
@@ -327,7 +328,7 @@ import { AuthService } from '../../services/auth.service';
       width: 100%;
       height: 100%;
       position: relative;
-      background: linear-gradient(to bottom, #E8D5B7 0%, #D4A574 100%);
+      background: linear-gradient(to bottom, #DC2626 0%, #B91C1C 100%);
       display: flex;
       align-items: flex-end;
       justify-content: center;
@@ -342,13 +343,13 @@ import { AuthService } from '../../services/auth.service';
       right: 0;
       height: 60%;
       background: 
-        linear-gradient(to bottom, transparent 0%, rgba(212, 165, 116, 0.3) 100%),
+        linear-gradient(to bottom, transparent 0%, rgba(185, 28, 28, 0.3) 100%),
         repeating-linear-gradient(
           90deg,
           transparent 0px,
           transparent 190px,
-          rgba(212, 165, 116, 0.05) 190px,
-          rgba(212, 165, 116, 0.05) 200px
+          rgba(185, 28, 28, 0.05) 190px,
+          rgba(185, 28, 28, 0.05) 200px
         );
       background-size: 100% 100%, 200px 4px;
     }
@@ -361,11 +362,11 @@ import { AuthService } from '../../services/auth.service';
       transform: translateX(-50%);
       width: 300px;
       height: 250px;
-      background: linear-gradient(180deg, #F5E6D3 0%, #E8D5B7 100%);
+      background: linear-gradient(180deg, #EF4444 0%, #DC2626 100%);
       border-radius: 8px;
       box-shadow: 
         0 10px 30px rgba(0, 0, 0, 0.1),
-        inset 0 -20px 40px rgba(201, 160, 103, 0.2);
+        inset 0 -20px 40px rgba(153, 27, 27, 0.2);
     }
 
     @media (min-width: 1024px) {
@@ -416,14 +417,45 @@ export class LoginComponent {
     this.loading = true;
     this.error = '';
 
+    console.log('Tentando fazer login com:', { email: this.email, password: '***' });
+
     this.authService.login({ email: this.email, password: this.password }).subscribe({
-      next: () => {
-        this.router.navigate(['/dashboard']);
+      next: (response) => {
+        console.log('LoginComponent - Login bem-sucedido, navegando para dashboard');
+        this.loading = false;
+        // Navega imediatamente após o login bem-sucedido
+        this.router.navigate(['/dashboard']).then(success => {
+          if (!success) {
+            console.error('LoginComponent - Falha ao navegar para dashboard');
+          }
+        });
       },
       error: (err) => {
-        this.error = 'Email ou senha incorretos';
         this.loading = false;
-        console.error('Erro no login:', err);
+        console.error('Erro completo no login:', err);
+        
+        // Tenta extrair a mensagem de erro do backend
+        let errorMessage = 'Email ou senha incorretos';
+        
+        if (err.error) {
+          // Se o backend retornou uma mensagem de erro
+          if (err.error.message) {
+            errorMessage = err.error.message;
+          } else if (typeof err.error === 'string') {
+            errorMessage = err.error;
+          } else if (err.error.error) {
+            errorMessage = err.error.error;
+          }
+        } else if (err.message) {
+          // Se for um erro de rede ou outro tipo
+          if (err.message.includes('HttpErrorResponse') || err.status === 0) {
+            errorMessage = 'Erro de conexão. Verifique se o servidor está rodando.';
+          } else {
+            errorMessage = err.message;
+          }
+        }
+        
+        this.error = errorMessage;
       }
     });
   }

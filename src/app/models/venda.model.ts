@@ -9,6 +9,7 @@ export interface Venda {
   pagoCompleto: boolean;
   valorPago?: number;
   valorRestante?: number;
+  observacoes?: string;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 }
