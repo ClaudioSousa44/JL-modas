@@ -98,9 +98,7 @@ import { AuthService } from '../../services/auth.service';
 
         <!-- Imagem decorativa -->
         <div class="decorative-image">
-          <div class="image-placeholder">
-            <!-- Imagem será aplicada via CSS -->
-          </div>
+          <img src="assets/frente-jl.jpg" alt="JL Modas" class="store-image" />
         </div>
       </div>
     </div>
@@ -318,55 +316,17 @@ import { AuthService } from '../../services/auth.service';
 
     .decorative-image {
       flex: 1;
-      background: linear-gradient(135deg, #DC2626 0%, #B91C1C 50%, #991B1B 100%);
       position: relative;
       display: none;
       overflow: hidden;
+      background: #DC2626;
     }
 
-    .image-placeholder {
+    .store-image {
       width: 100%;
       height: 100%;
-      position: relative;
-      background: linear-gradient(to bottom, #DC2626 0%, #B91C1C 100%);
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 40px;
-    }
-
-    .image-placeholder::before {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 60%;
-      background: 
-        linear-gradient(to bottom, transparent 0%, rgba(185, 28, 28, 0.3) 100%),
-        repeating-linear-gradient(
-          90deg,
-          transparent 0px,
-          transparent 190px,
-          rgba(185, 28, 28, 0.05) 190px,
-          rgba(185, 28, 28, 0.05) 200px
-        );
-      background-size: 100% 100%, 200px 4px;
-    }
-
-    .image-placeholder::after {
-      content: '';
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 300px;
-      height: 250px;
-      background: linear-gradient(180deg, #EF4444 0%, #DC2626 100%);
-      border-radius: 8px;
-      box-shadow: 
-        0 10px 30px rgba(0, 0, 0, 0.1),
-        inset 0 -20px 40px rgba(153, 27, 27, 0.2);
+      object-fit: cover;
+      object-position: center;
     }
 
     @media (min-width: 1024px) {
